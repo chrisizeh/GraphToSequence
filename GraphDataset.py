@@ -12,7 +12,6 @@ from torch_geometric.data import Dataset, Data
 
 
 class RandomGraphDataset(Dataset):
-
     def __init__(self, root, nodes=5, data_count=10, area=[[0, 100], [0, 100], [0, 100]], transform=None, pre_transform=None, pre_filter=None):
         self.nodes = nodes
         self.data_count = data_count
@@ -42,7 +41,7 @@ class RandomGraphDataset(Dataset):
             nAllEdges = int(self.nodes * (self.nodes - 1) / 2)
             num = 0
 
-            all_edges = np.zeros((2, nAllEdges))
+            all_edges = np.zeros((2, nAllEdges), dtype=np.int64)
             for i in range(self.nodes):
                 for j in range(i + 1, self.nodes):
                     all_edges[0, num] = i
