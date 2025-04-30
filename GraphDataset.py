@@ -49,7 +49,7 @@ class RandomGraphDataset(Dataset):
                     num += 1
 
             for nodes in range(self.data_count):
-                numEdges = random.randrange(self.nodes * (self.nodes - 1) / 2)
+                numEdges = min(random.randrange(self.nodes * (self.nodes - 1) / 2), 50)
                 edges = random.sample(range(nAllEdges), numEdges)
 
                 data = Data(x=torch.from_numpy(run), num_nodes=self.nodes, edge_index=torch.from_numpy(all_edges[:, edges]))
