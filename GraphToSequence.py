@@ -10,8 +10,9 @@ def edge_count(edges):
     return np.array(unique), np.array(counts)
 
 
-def sequence_subgraph(connNodes, nodeDegree, alledges, edges, visited=np.array([]), done=np.array([])):
+def sequence_subgraph(connNodes, nodeDegree, alledges, edge, last, visited=np.array([]), done=np.array([])):
     seq = ""
+    edges = np.array([edge])
 
     while (edges.shape[0] > 0):
         _, indx, _ = np.intersect1d(connNodes, np.setdiff1d(edges, visited, assume_unique=True), assume_unique=True, return_indices=True)
@@ -23,7 +24,8 @@ def sequence_subgraph(connNodes, nodeDegree, alledges, edges, visited=np.array([
 
         if (len(visited) > 1):
             for edge in np.intersect1d(edges, visited[:-1]):
-                seq += "*" + str(edge) + "."
+                if (edge != last):
+                    seq += "*" + str(edge) + "."
 
         visited = np.append(visited, v)
         edges = np.setdiff1d(edges, visited, assume_unique=True)
@@ -32,12 +34,13 @@ def sequence_subgraph(connNodes, nodeDegree, alledges, edges, visited=np.array([
             for edge in edges:
                 if edge not in visited:
                     seq += "("
-                    new_seq, edges, visited, done = sequence_subgraph(connNodes, nodeDegree, alledges, np.array([edge]), visited, done)
+                    new_seq, edges, visited, done = sequence_subgraph(connNodes, nodeDegree, alledges, edge, v, visited, done)
                     seq += new_seq
                     seq += ")"
 
         if (edges.shape[0] <= 1):
             np.append(done, v)
+        last = v
 
     return seq, edges, visited, done
 
@@ -51,15 +54,16 @@ def sequence(alledges):
     edges = np.array([], dtype=np.int32)
 
     while (not (np.isin(connNodes, visited)).all()):
+
         if (edges.shape[0] > 0):
             _, indx, _ = np.intersect1d(connNodes, np.setdiff1d(edges, visited, assume_unique=True), assume_unique=True, return_indices=True)
             v = (connNodes[indx])[np.argmin(nodeDegree[indx])]
         else:
             indx = np.isin(connNodes, visited, assume_unique=True, invert=True)
             v = (connNodes[indx])[np.argmin(nodeDegree[indx])]
+
         seq += str(v) + "."
 
-        print(v)
         opts = np.argwhere(alledges == v)
         edges = alledges[opts[:, 0]-1, opts[:, 1]]
 
@@ -74,7 +78,7 @@ def sequence(alledges):
             for edge in edges:
                 if edge not in visited:
                     seq += "("
-                    new_seq, edges, visited, done = sequence_subgraph(connNodes, nodeDegree, alledges, np.array([edge]), visited, done)
+                    new_seq, edges, visited, done = sequence_subgraph(connNodes, nodeDegree, alledges, edge, v, visited, done)
                     seq += new_seq
                     seq += ")"
 
