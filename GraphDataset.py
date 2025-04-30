@@ -12,8 +12,9 @@ from torch_geometric.data import Dataset, Data
 
 
 class RandomGraphDataset(Dataset):
-    def __init__(self, root, nodes=5, data_count=10, area=[[0, 100], [0, 100], [0, 100]], transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, root, nodes=5, edges=None, data_count=10, area=[[0, 100], [0, 100], [0, 100]], transform=None, pre_transform=None, pre_filter=None):
         self.nodes = nodes
+        self.edgeCount = edges
         self.data_count = data_count
         self.area = np.array(area)
         super().__init__(root, transform, pre_transform, pre_filter)
@@ -49,7 +50,10 @@ class RandomGraphDataset(Dataset):
                     num += 1
 
             for nodes in range(self.data_count):
-                numEdges = min(random.randrange(self.nodes * (self.nodes - 1) / 2), 50)
+                if self.edgeCount:
+                    numEdges = self.edgeCount
+                else:
+                    numEdges = min(random.randrange(self.nodes * (self.nodes - 1) / 2), 50)
                 edges = random.sample(range(nAllEdges), numEdges)
 
                 data = Data(x=torch.from_numpy(run), num_nodes=self.nodes, edge_index=torch.from_numpy(all_edges[:, edges]))
