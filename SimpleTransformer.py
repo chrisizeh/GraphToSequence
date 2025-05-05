@@ -92,6 +92,7 @@ class SimpleTransformer(nn.Module):
         embedding = self.embed(x)
         # Add positional encoding
         embedding = self.pos_encoder(embedding)
-        transformer_out = self.transformer_block(embedding, embedding, embedding)
-        out = self.fc_out(transformer_out)
+        embedding = self.transformer_block(embedding, embedding, embedding)
+        embedding = self.transformer_block(embedding, embedding, embedding)
+        out = self.fc_out(embedding)
         return out

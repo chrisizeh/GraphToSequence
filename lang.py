@@ -7,9 +7,9 @@ EOS_token = 1
 
 class Lang:
     def __init__(self, num_nodes):
-        self.word2index = {"(": 3, ")": 4, "*": 5, ".": 6}
-        self.index2word = {0: "PAD", 1: "SOS", 2: "EOS", 3: "(", 4: ")", 5: "*", 6: "."}
-        self.n_words = 7  # Count SOS and EOS
+        self.word2index = {";": 3, "(": 4, ")": 5, "*": 6, ".": 7}
+        self.index2word = {0: "<PAD>", 1: "<SOS>", 2: "<EOS>", 3: ";", 4: "(", 5: ")", 6: "*", 7: "."}
+        self.n_words = 8  # Count SOS, EOS and PAD
 
         for i in range(num_nodes):
             self.index2word[self.n_words] = str(i)
@@ -37,21 +37,32 @@ class Lang:
         arr[1:] = self.seq2arr(seq, max_len, min_len)
         return arr
 
-    # WIP
+    def subseq2arr(self, seq, arr_length, index, length):
+        arr = np.zeros(arr_length, dtype=np.int64)
+        stop = 0
 
-    def subseq2arr(self, seq, index, length=-1, max_len=-1, min_len=0):
-        arr = np.zeros(max(max_len, min_len) + 2, dtype=np.int64)
+        if (index+length >= len(seq)):
+            arr[-1] = 2
+            stop = 1
+            length = len(seq) - index
 
-        if (index == 0):
-            arr[0] = 1
+        if (length + stop > arr_length):
+            length = arr_length - stop
 
-        arr[1:] = self.seq2arr(seq[index:index+length], max_len, min_len)
-
-        if (index+length > len(seq)):
-            arr[len(seq)] = 2
+        if (index < 0):
             return arr
-        else:
-            return arr[:-1]
+        elif (index == 0):
+            arr[arr_length-length-stop-1] = 1
+
+        if length > 0:
+            arr[arr_length-length-stop:arr_length-stop] = self.seq2arr(seq[index:index+length])
+
+        return arr
+
+    def arr2seq(self, arr, ignoreTokens=False):
+        if (ignoreTokens):
+            return "".join([self.index2word[idx.item()] for idx in arr if idx > 2])
+        return "".join([self.index2word[idx.item()] for idx in arr])
 
 
 if __name__ == "__main__":
@@ -61,4 +72,8 @@ if __name__ == "__main__":
     print(lang.seq2arr(".11.(12.6.", max_len=4))
     print(lang.seq2arr(".", min_len=3))
     print(lang.seq2arr("", min_len=3))
-    print(lang.seq2arrWithStart("", min_len=3))
+    print(lang.subseq2arr("", 4, 0, 0))
+    print(lang.subseq2arr("1234", 4, 0, 1))
+    print(lang.subseq2arr(".11.(12.6.", 5, 0, 4))
+    print(lang.subseq2arr(".11.(", 7, 0, 5))
+    print(lang.subseq2arr("4.8.;13.11.(12.6.(7.9.10.5.*6.3.1.2.*11.))", 11, 31, 11))
