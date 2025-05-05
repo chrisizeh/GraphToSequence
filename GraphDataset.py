@@ -58,7 +58,7 @@ class RandomGraphDataset(Dataset):
                     numEdges = min(random.randrange(self.nodes * (self.nodes - 1) / 2), 50)
                 edges = random.sample(range(nAllEdges), numEdges)
 
-                data = Data(x=torch.from_numpy(run), num_nodes=self.nodes, edge_index=torch.from_numpy(all_edges[:, edges], y=graphToSequence(all_edges[:, edges])))
+                data = Data(x=torch.from_numpy(run), num_nodes=self.nodes, edge_index=torch.from_numpy(all_edges[:, edges]), y=graphToSequence(all_edges[:, edges]))
 
                 if self.pre_filter is not None and not self.pre_filter(data):
                     continue
